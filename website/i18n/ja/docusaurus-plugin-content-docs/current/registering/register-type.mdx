@@ -1,21 +1,21 @@
 ---
-title: Register Plain C# Type
+title: プレーンなC＃タイプの登録
 ---
 
-There are various ways to use Register.
-Let's take the following complex type as an example.
+Registerを使用する方法はさまざまです。
+以下の複合タイプを例に取ります。
 
 ```csharp
 class ServiceA : IServiceA, IInputPort, IDisposable { /* ... */ }
 ```
 
-## Register Concrete Type
+## 具体的な型の登録
 
 ```cs
 builder.Register<ServiceA>(Lifetime.Singleton);
 ```
 
-It can resolve like this:
+次のように解決できます：
 
 ```csharp
 class ClassA
@@ -24,13 +24,13 @@ class ClassA
 }
 ```
 
-## Register as Interface
+## インターフェースとして登録
 
 ```csharp
 builder.Register<IServiceA, ServiceA>();
 ```
 
-It can resolve like this:
+次のように解決できます：
 
 ```csharp
 class ClassA
@@ -39,14 +39,14 @@ class ClassA
 }
 ```
 
-## Register as multiple Interface
+## 複数のインターフェースとして登録
 
 ```csharp
 builder.Register<ServiceA>(Lifetime.Singleton)
     .As<IServiceA, IInputPort>();
 ```
 
-It can resolve like this:
+次のように解決できます：
 
 ```csharp
 class ClassA
@@ -60,14 +60,14 @@ class ClassB
 }
 ```
 
-## Register all implemented interfaces automatically
+## 実装されたすべてのインターフェースを自動的に登録
 
 ```csharp
 builder.Register<ServiceA>(Lifetime.Singleton)
     .AsImplementedInterfaces();
 ```
 
-It can resolve like this:
+次のように解決できます：
 
 ```csharp
 class ClassA
@@ -81,7 +81,7 @@ class ClassB
 }
 ```
 
-## Register all implemented interfaces and concrete type
+## 実装されたすべてのインターフェースと具体的な型の登録
 
 ```csharp
 builder.Register<ServiceA>(Lifetime.Singleton)
@@ -89,7 +89,7 @@ builder.Register<ServiceA>(Lifetime.Singleton)
     .AsSelf();
 ```
 
-It can resolve like this:
+次のように解決できます：
 
 ```csharp
 class ClassA
@@ -102,13 +102,13 @@ class ClassB
     public ClassB(IInputPort inputPort) { /* ... */ }
 }
 
-class ClassB
+class ClassC
 {
-    public ClassB(ServiceA serviceA) { /* ... */ }
+    public ClassC(ServiceA serviceA) { /* ... */ }
 }
 ```
 
-## Register lifecycle marker interfaces
+## ライフサイクルマーカーインターフェースの登録
 
 ```csharp
 class GameController : IStartable, ITickable, IDisposable { /* ... */ }
@@ -119,21 +119,21 @@ builder.RegisterEntryPoint<GameController>();
 ```
 
 :::note
-This is similar to `Register<GameController>(Lifetime.Singleton).AsImplementedInterfaces()` .
-The key difference is whether it runs in PlayerLoopSystem or not.
+これは`Register<GameController>(Lifetime.Singleton).AsImplementedInterfaces()`と似ています。
+主な違いはPlayerLoopSystemで実行するかどうかです。
 :::
 
-If you want to customize the exception handling for entry points, you can register a callback with the following.
+エントリーポイントの例外処理をカスタマイズしたい場合は、次のようにコールバックを登録できます。
 
 ```csharp
 builder.RegisterEntryPointExceptionHandler(ex =>
 {
     UnityEngine.Debug.LogException(ex);
-    // Additional process ...
+    // 追加の処理...
 });
 ```
 
-If you have multiple EntryPoints, you have the option to use the following declaration as grouping.
+複数のEntryPointがある場合、グルーピングとして次の宣言を使うことができます。
 
 ```csharp
 builder.UseEntryPoints(entryPoints =>
@@ -145,7 +145,7 @@ builder.UseEntryPoints(entryPoints =>
 });
 ```
 
-This is the same as:
+これは次のものと同じです：
 
 ```csharp
 builder.RegisterEntryPoint<ScopedEntryPointA>();
@@ -154,9 +154,9 @@ builder.RegisterEntryPoint<ScopedEntryPointC>().AsSelf();
 builder.RegisterEntryPointExceptionHandler(ex => ...);
 ```
 
-See the [Plain C# Entry point](../integrations/entrypoint) section for more information.
+詳細は [プレーンC#エントリーポイント](../integrations/entrypoint) をご覧ください。
 
-## Register instance
+## インスタンスの登録
 
 ```csharp
 // ...
@@ -167,10 +167,10 @@ builder.RegisterInstance(obj);
 ```
 
 :::note
-`RegisterIntance` always has a `Singleton` lifetime, so it has no arguments.
+`RegisterIntance`は常に`Singleton`の寿命を持つため、引数はありません。
 :::
 
-It can resolve like this:
+次のように解決できます：
 
 ```csharp
 class ClassA
@@ -180,20 +180,20 @@ class ClassA
 ```
 
 :::note
-Instances registered with RegisterInstance are not managed by the container.
+RegisterInstanceで登録されたインスタンスはコンテナによって管理されません。
 
-- Dispose will not be executed automatically.
-- Method Injection will not be executed automatically
+- Disposeは自動的に実行されません。
+- Method Injectionも自動的には実行されません。
 
-If you want the container to manage the created instances, consider using the following instead
+コンテナに作成したインスタンスを管理させたい場合は、以下のいずれかを代わりに使用することを検討してみてください。
 
 - [Register(_ => instance, ...)](./register-using-delegate)
 - [RegisterComponent(...)](./register-monobehaviour)
 :::
 
-##  Register instance as interface
+## インターフェースとしてインスタンスを登録
 
-Use `As*` declarations.
+`As*`の宣言を使用します。
 
 ```csharp
 builder.RegisterInstance<IInputPort>(serviceA);
@@ -201,28 +201,27 @@ builder.RegisterInstance<IInputPort>(serviceA);
 builder.RegisterInstance(serviceA)
     .As<IServiceA, IInputPort>();
 
-builder.RegisterInstance()
+builder.RegisterInstance(serviceA)
     .AsImplementedInterfaces();
 ```
 
-## Register type-specific parameters
+## 型固有のパラメーターの登録
 
-If the types are not unique, but you have a dependency you want to inject at startup, you can use the following:
+型が一意ではないが、起動時にインジェクトしたい依存関係がある場合、次のようにすることができます：
 
 ```csharp
 builder.Register<SomeService>(Lifetime.Singleton)
     .WithParameter<string>("http://example.com");
 ```
 
-Or, you can name a paramter with a key.
+または、キーでパラメーターを名付けることができます。
 
 ```csharp
 builder.Register<SomeService>(Lifetime.Singleton)
     .WithParameter("url", "http://example.com");
 ```
 
-It can resolve like this:
-
+次のように解決できます：
 
 ```csharp
 class SomeService
@@ -231,17 +230,17 @@ class SomeService
 }
 ```
 
-This Register only works when being injected into `SomeService`.
+この登録は`SomeService`にインジェクトされる場合にのみ機能します。
 
 ```csharp
 class OtherClass
 {
-    // ! Error
+    // ! エラー
     public OtherClass(string hogehoge) { /* ... */ }
 }
 ```
 
-## Register Open Generics
+## オープンジェネリクスの登録
 
 ```csharp
 class GenericType<T>
@@ -254,7 +253,7 @@ class GenericType<T>
 builder.Register(typeof(GenericType<>), Lifetime.Singleton);
 ```
 
-It can resolve like this:
+次のように解決できます：
 
 ```csharp
 class SomeService
@@ -263,5 +262,5 @@ class SomeService
 }
 ```
 
-In this case, the concrete type is constructed at runtime.
-We have confirmed that this works with IL2CPP from Unity 2022.1 onwards, but older versions may not support dynamic typedefs.
+この場合、具体的な型はランタイムで構築されます。
+Unity 2022.1以降のIL2CPPで動作することを確認していますが、古いバージョンでは動的型定義をサポートしていないかもしれません。
